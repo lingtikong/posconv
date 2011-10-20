@@ -52,8 +52,8 @@ implicit none
    xlo = xlo - MIN(0., MIN(xy, MIN(xz, xy+xz)))
    xhi = xhi - MAX(0., MAX(xy, MAX(xz, xy+xz)))
 
-  ylo = ylo - MIN(0.,yz)
-  yhi = yhi - MAX(0.,yz)
+   ylo = ylo - MIN(0.,yz)
+   yhi = yhi - MAX(0.,yz)
    !
    axis = 0.D0
    axis(1,1) = xhi - xlo

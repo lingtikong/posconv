@@ -9,10 +9,10 @@ implicit none
    !----------------------------------------------------------------------------
    integer             :: ioerr, i, j, iatom, istr, iend
    real(q)             :: radum(3), vol
-   character (len=256) :: input
+   character (len=256) :: input, elements
    character (len=20 ) :: strtmp, flag
    character (len=1 )  :: cdum, cadum(3)
-   logical             :: seldyn = .false.
+   logical             :: seldyn = .false., f_eread = .false.
    !----------------------------------------------------------------------------
    subname = 'readvasp'
    !
@@ -33,7 +33,12 @@ implicit none
    ! Read number of atoms
    read( ioin, '(A)', iostat=ioerr ) input
    call error( subname, info, ioerr )
-   !
+   if ( .not.is_numeric(input) ) then
+      elements = input  ! vasp 5 writes elements info before defining # of atoms
+      f_eread  = .true.
+      read( ioin, '(A)', iostat=ioerr ) input
+      call error( subname, info, ioerr )
+   endif
    ! If NMax is changed in module 'cell', the number of '0' here should
    ! also be changed.
    input = trim(input)//" 0 0 0 0 0 0 0 0 0 0"
@@ -102,11 +107,16 @@ implicit none
    call axis2abc
    !
    ! Ask the user to input the element(s) name
-   write(*, '(/, 10x, "Please input the element name for the ", I2, " kind(s) of atoms" )' ) ntype
-   write(*, '(   10x, "in the sequence of POSCAR : ", $ )' )
-   read (*, *, iostat=ioerr ) EName
    info = 'Wrong input while the system tries to get the element names!'
+   if (f_eread) then
+      read(elements, *, iostat=ioerr) EName
+   else
+      write(*, '(/, 10x, "Please input the element name for the ", I2, " kind(s) of atoms" )' ) ntype
+      write(*, '(   10x, "in the sequence of POSCAR : ", $ )' )
+      read (*, *, iostat=ioerr ) EName
+   endif
    call error( subname, info, ioerr )
+   ERead(1:ntype) = EName
    !
 return
 end subroutine
@@ -117,19 +127,21 @@ use cell
 use iounits
 implicit none
    !----------------------------------------------------------------------------
-   character(len=40  ) :: fmtstr = '( ??(I4, 2X) )'
+   character(len=40  ) :: fmtstr1 = '(??(A4,2X) )', fmtstr2 = '(??(I4, 2X) )'
    integer             :: i, j
    logical             :: seldyn
    !----------------------------------------------------------------------------
    if ( cartesian ) call car2dir
    !
-   write( fmtstr(3:4), 100 ) ntype
+   write( fmtstr1(2:3), 100 ) ntype
+   write( fmtstr2(2:3), 100 ) ntype
    write( ioout, 110 ) trim(title)
    write( ioout, 120 ) alat
    write( ioout, 150 ) axis(1, :)
    write( ioout, 150 ) axis(2, :)
    write( ioout, 150 ) axis(3, :)
-   write( ioout, fmtstr ) ntm
+   write( ioout, fmtstr1 ) EName
+   write( ioout, fmtstr2 ) ntm
    !
    seldyn = sum(atrel).lt.(3*natom)
    if ( seldyn ) write( ioout, 160 )
