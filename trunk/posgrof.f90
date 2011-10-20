@@ -65,6 +65,7 @@ implicit none
    write(*, '(   10x, "please input their respective element name(s) :", $ )' )
    read (*, *, iostat=ioerr) EName
    call error( subname, info, ioerr )
+   ERead(1:ntype) = EName
    !
    info = input
    cartesian = .false.
