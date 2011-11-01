@@ -253,7 +253,8 @@ implicit none
             write(*,'(/,10x,"Original position of the new origin: ",3F12.6)') postmp
          endif
       case ( 20 ) ! Reset atomic types
-         write(*,'(/,10x,"Atomic types current assigned:",/,12x,"Assigned  type IDs: ", $)')
+         write(*,'(/,10x,"*** Caution: this might not always work as expected ***")');
+         write(*,'(10x,"Atomic types current assigned:",/,12x,"Assigned  type IDs: ", $)')
          do i = 1, ntype
             write(*, '(I4,$)') typeID(i)
          enddo

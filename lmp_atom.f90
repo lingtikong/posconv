@@ -7,7 +7,7 @@ use cell
 use iounits
 implicit none
    !-----------------------------------------------------------------
-   integer            :: ioerr, i, j
+   integer            :: ioerr, i, j, jp
    real(q)            :: radum(3), vol, xlo, xhi, ylo, yhi, zlo, zhi
    real(q)            :: xy, xz, yz
    character (len=256):: input
