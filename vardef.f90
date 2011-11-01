@@ -23,7 +23,7 @@ implicit none
    !----------------------------------------------------------------------------
    ! Used to identify atomic type
    integer, parameter :: NMax = 10
-   integer            :: iadum(NMax) = 0, idum = 0
+   integer            :: iadum(NMax) = 0, idum = 0, typeID(NMax)
    character (len=2)  :: ERead(NMax)
    !----------------------------------------------------------------------------
    ! Default input/output file names:

@@ -106,7 +106,7 @@ implicit none
 200 format( "PBC=ON" )
 300 format( A )
 400 format( "!Converted ", A4, "-", A2, "-", A2, 2X, A2,":",A2,":",A2 )
-500 format( "PBC", 6F10.4, 1X, "(P1)" )
+500 format( "PBC", 6F12.6, 1X, "(P1)" )
 550 format( I1 )
 600 format( "end", /, "end" )
 800 format( A5, 3(1X, F14.9), 1X, "XXXX", 1X, I1, 6X, "xx", 6X, A2, 1X, F6.3 )
@@ -153,7 +153,7 @@ implicit none
    write( ioout, 800 )
    !
 100 format( "TITL", 2X, A )
-200 format( "CELL", 7F9.4 )
+200 format( "CELL", 7F12.6 )
 300 format( "LATT -1" )
 400 format( "SFAC", $ )
 500 format( A3, $     )

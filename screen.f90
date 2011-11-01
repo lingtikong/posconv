@@ -1,5 +1,5 @@
 integer function typescreen( Ein )
-use cell, only: ntype, Eread, NMax
+use cell, only: ntype, Eread, NMax, typeID
 implicit none
    !----------------------------------------------------------------------------
    character ( len=2 ), intent(in) :: Ein
@@ -23,7 +23,8 @@ implicit none
          errinfo = 'Too many kinds of atoms found!'
          call error( sname, errinfo, ntype )
       endif
-      Eread(ntype) = Ein
+      Eread(ntype)  = Ein
+      typeID(ntype) = ntype
    endif
    typescreen = j
 return
@@ -57,7 +58,7 @@ return
 end function typeindex
 
 subroutine DisplayTypeRead()
-use cell, only: ntype, Eread
+use cell, only: ntype, Eread, typeID
 implicit none
    !--------------------------------------------------------------
    integer  :: i
@@ -66,7 +67,7 @@ implicit none
    write(*, '(10x,"Comparison of atom types read and assigned:",/,10x,70("-"))')
    write(*, '(12x,"Assigned type  ID: ", $)')
    do i = 1, ntype
-      write(*, '(I4,$)') i
+      write(*, '(I4,$)') typeID(i)
    enddo
    write(*, '(/,12x,"Read type name/ID: ", $)')
    do i = 1, ntype
