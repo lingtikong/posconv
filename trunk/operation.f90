@@ -13,6 +13,7 @@ implicit none
    real(q)            :: rotx(3,3), roty(3,3), rotz(3,3), ralph, rbeta, rgamm
    real(q)            :: rcosa, rsina, rcosb, rsinb, rcosg, rsing
    logical            :: first = .true.
+   integer            :: newID(NMax)
    !----------------------------------------------------------------------------
    ! Special operation on atomic positions
    do while ( .true. )
@@ -26,7 +27,7 @@ implicit none
       write(*, '( 15x, "7. Rescale z axis;           | 16. Realign the molecular;   " )' )
       write(*, '( 15x, "8. Calculate nominal radius; | 17. Rotate the lattice;   " )' )
       write(*, '( 15x, "9. Apply pbc condition;      | 18. Calculate neighbor list;")')
-      write(*, '( 15x, "                             | 19. Shift the origin of cell;")')
+      write(*, '( 14x,"20. Reset atomic types;       | 19. Shift the origin of cell;")')
       !
       if ( first ) then
          write(*, '(15x, "0. As is." )' )
@@ -143,7 +144,7 @@ implicit none
          idir = iref - 9
          write(*,'(/,10x,"Please indicate the way to shift :")')
          write(*,'(  15x,"1. shift in cartesian by certain amount;")')
-         write(*,'(  15x,"2. shift in fractional by certain amoutn;")')
+         write(*,'(  15x,"2. shift in fractional by certain amount;")')
          write(*,'(  15x,"0. Exit.")')
          write(*,'(  10x,"Your choice[0]: ",$)')
          read (*,'(A)',iostat=ioerr) input
@@ -251,6 +252,34 @@ implicit none
             forall (i=1:natom) atpos(:,i) = atpos(:,i) - postmp
             write(*,'(/,10x,"Original position of the new origin: ",3F12.6)') postmp
          endif
+      case ( 20 ) ! Reset atomic types
+         write(*,'(/,10x,"Atomic types current assigned:",/,12x,"Assigned  type IDs: ", $)')
+         do i = 1, ntype
+            write(*, '(I4,$)') typeID(i)
+         enddo
+         write(*, '(/,12x,"Read type name/IDs: ", $)')
+         do i = 1, ntype
+            write(*, '(A4,$)') trim(Eread(i))
+         enddo
+         write(*,'(/,10x, "Your desired new IDs: ", $)');
+         read(*, *) newID(1:ntype)
+         do i = 1, natom
+            do j = 1, ntype
+               if ( attyp(i).eq.typeID(j) ) exit
+            enddo
+            attyp(i) = newID(j)
+         enddo
+         typeID(1:ntype) = newID(1:ntype)
+
+         write(*,'(/,10x,"Atomic types are now assigned as:",/,12x,"Assigned  type IDs: ", $)')
+         do i = 1, ntype
+            write(*, '(I4,$)') typeID(i)
+         enddo
+         write(*, '(/,12x,"Read type name/IDs: ", $)')
+         do i = 1, ntype
+            write(*, '(A4,$)') trim(Eread(i))
+         enddo
+         write(*,*)
       case default
          exit
       end select
