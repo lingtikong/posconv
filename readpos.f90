@@ -3,10 +3,14 @@ use cell
 use iounits
 implicit none
    !----------------------------------------------------------------------------
-   integer :: ioerr
+   integer :: ioerr, i
    !----------------------------------------------------------------------------
    axis    = 0.D0
    Eread   = ''
+   !
+   do i = 1, NMax
+      typeID(i) = i
+   enddo
    !
    if ( allocated( atpos  ) ) deallocate( atpos   )
    if ( allocated( atrel  ) ) deallocate( atrel   )

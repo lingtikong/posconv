@@ -1,5 +1,5 @@
 integer function typescreen( Ein )
-use cell, only: ntype, Eread, NMax, typeID
+use cell, only: ntype, Eread, NMax
 implicit none
    !----------------------------------------------------------------------------
    character ( len=2 ), intent(in) :: Ein
@@ -24,7 +24,6 @@ implicit none
          call error( sname, errinfo, ntype )
       endif
       Eread(ntype)  = Ein
-      typeID(ntype) = ntype
    endif
    typescreen = j
 return
