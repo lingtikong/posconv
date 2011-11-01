@@ -150,13 +150,13 @@ implicit none
    if ( seldyn ) then
       do j = 1, ntype
       do i = 1, natom
-         if ( attyp(i).eq.j ) write( ioout, 200 ) atpos(:, i), atrel(:,i)
+         if ( attyp(i).eq.typeID(j) ) write( ioout, 200 ) atpos(:, i), atrel(:,i)
       enddo
       enddo
    else
       do j = 1, ntype
       do i = 1, natom
-         if ( attyp(i).eq.j ) write( ioout, 250 ) atpos(:, i)
+         if ( attyp(i).eq.typeID(j) ) write( ioout, 250 ) atpos(:, i)
       enddo
       enddo
    endif

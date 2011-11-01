@@ -30,7 +30,6 @@ implicit none
    integer             :: ioerr, rderr, i, aid, mid, tid, idumarray(5)
    character (len=256) :: oneline
    character (len=20 ) :: strtmp
-   integer, external   :: typescreen
    !-----------------------------------------------------------------
    subname   = 'readlmpfull'
    atoms     = 0
@@ -300,6 +299,7 @@ implicit none
    do i = 1, ntype
       write(EName(i),'(I2)') i
    enddo
+   Eread(1:ntype) = EName(1:ntype)
    !
    cartesian = .true.
    call axis2abc()
