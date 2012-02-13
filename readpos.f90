@@ -40,6 +40,10 @@ implicit none
       call readlmpfull
    case ( 9 ) ! LAMMPS dump atom
       call read_lmp_atom
+   case ( 10 ) ! SIESTA STRUCT_IN
+      call readsiesta
+   case ( 11 ) ! Abinit/BigDFT xyz
+      call read_abinit_xyz
    case default
       info = 'Un-supported format!'
       call error( subname, info, 1 )
