@@ -31,6 +31,10 @@ implicit none
       call writelmp_full
    case ( 11 )
       call write_lmp_atom
+   case ( 12 )
+      call writesiesta ! SIESTA STRUCT_IN
+   case ( 13 )         ! Abinit/BigDFT xyz
+      call write_abinit_xyz
    case default
       info = "Un-support format!"
       call error( subname, info, 1 )
