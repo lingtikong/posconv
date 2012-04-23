@@ -44,6 +44,8 @@ implicit none
       call readsiesta
    case ( 11 ) ! Abinit/BigDFT xyz
       call read_abinit_xyz
+   case ( 12 )
+      call readres
    case default
       info = 'Un-supported format!'
       call error( subname, info, 1 )

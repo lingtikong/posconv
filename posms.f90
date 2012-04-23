@@ -114,6 +114,73 @@ implicit none
 return
 end subroutine
 !
+subroutine readres
+use prec
+use cell
+use iounits
+implicit none
+   !-----------------------------------------------------------------
+   integer            :: ioerr, i
+   real(q)            :: radum(3), rdum
+   logical            :: lpbc
+   character (len=256):: input, elist
+   character (len=20 ):: ctmp, stmp
+   integer, external  :: typescreen
+   !-----------------------------------------------------------------
+   subname = 'readres'
+   !
+   ntype = 0
+   natom = 0
+   !
+   read(ioin, *, iostat=ioerr) input, title
+   read(ioin, *, iostat=ioerr) stmp, rdum, a, b, c, alpha, beta, gamma
+   read(ioin, *, iostat=ioerr)
+   read(ioin, '(A)', iostat=ioerr) elist
+   !
+   do while ( ioerr.eq.0 )
+      natom = natom + 1
+      read( ioin, '(A)', iostat=ioerr ) input
+   enddo
+   natom = natom - 2
+   if ( natom.lt.1 ) then
+      info = 'Too few atoms read from: '//trim(infile)
+      call error( subname, info, abs(natom-1) )
+   endif
+   allocate( atpos(3, natom), atrel(3,natom), attyp(natom) )
+   atrel = 1
+   !
+   rewind( ioin )
+   info = 'Error encountered while reading file'//trim(infile)
+   !
+   do i = 1, 4
+     read( ioin, *, iostat=ioerr ) 
+   enddo
+   !
+   ! Read atomic positions
+   do i = 1, natom
+      read( ioin, *, iostat=ioerr ) ctmp, stmp, atpos(:,i)
+      idum = typescreen( stmp )
+      read(stmp, *) attyp(i)
+   enddo
+   !
+   if ( ntype.lt.1 ) then
+      info = 'Too few elements identified from:'//trim(infile)
+      call error( subname, info, abs(ntype-1) )
+   endif
+   !
+   ! To assign all other cell related variables
+   allocate( ntm(ntype), EName(ntype) )
+   forall( i=1:ntype ) ntm(i) = count(attyp.eq.i)
+   read(elist,*) stmp, (EName(i),i=1,ntype)
+   Eread(1:ntype) = EName(1:ntype)
+   alat  = 1.D0
+   !
+   cartesian = .false.
+   call abc2axis()
+   !
+return
+end subroutine
+!
 subroutine writeres
 use prec
 use cell

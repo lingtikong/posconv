@@ -132,6 +132,7 @@ implicit none
    logical             :: seldyn
    !----------------------------------------------------------------------------
    if ( cartesian ) call car2dir
+   call reduceaxis
    !
    write( fmtstr1(2:3), 100 ) ntype
    write( fmtstr2(2:3), 100 ) ntype

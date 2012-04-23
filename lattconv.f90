@@ -97,6 +97,25 @@ implicit none
 return
 end subroutine
 !
+subroutine reduceaxis()
+use cell
+implicit none
+   !--------------------------------------------------------------
+   real(q) :: la, rla
+   integer :: i, j
+   !--------------------------------------------------------------
+   la  = sqrt(sum(axis(1,:)*axis(1,:)))
+   rla = 1.D0/la
+   
+   alat = alat * la
+   do i = 1, 3
+   do j = 1, 3
+      axis(i,j) = axis(i,j) * rla
+   enddo
+   enddo
+return
+end subroutine
+!
 subroutine axis2abc( )
 use cell
 implicit none
