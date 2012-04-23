@@ -27,15 +27,16 @@ implicit none
    character (len=2)  :: ERead(NMax)
    !----------------------------------------------------------------------------
    ! Default input/output file names:
-   character (len=80) :: defaultIns(11) = (/ 'POSCAR        ', 'atomcfg       ',&
+   character (len=80) :: defaultIns(12) = (/ 'POSCAR        ', 'atomcfg       ',&
    &                     'atomcfg.xyz   ',  'dynmat.icfg   ', 'fort.90       ',&
    &                     'moldyn.vel    ',  'noname        ', 'data.in       ',&
-   &                     'dump.lammpstrj',  'STRUCT_IN     ', 'posinp.xyz    '/),  &
-   &                     defaultOut(13)= (/ 'POSCAR        ', 'atomcfg       ',&
+   &                     'dump.lammpstrj',  'STRUCT_IN     ', 'posinp.xyz    ',&
+   &                     'atomcfg.res   '                                     /),&
+   &                     defaultOut(14)= (/ 'POSCAR        ', 'atomcfg       ',&
    &                     'atomcfg.xyz   ',  'dynmat.icfg   ', 'geo           ',&
    &                     'moldyn.vel    ',  'atomcfg.car   ', 'atomcfg.res   ',&
    &                     'data.pos      ',  'data.out      ', 'dump.lammpstrj',&
-   &                     'STRUCT_IN     ',  'posinp.xyz    ' /)
+   &                     'STRUCT_IN     ',  'posinp.xyz    ', 'latgen        ' /)
    !----------------------------------------------------------------------------
    integer            :: Ninpostypes, Noutpostypes
    !----------------------------------------------------------------------------

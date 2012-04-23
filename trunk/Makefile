@@ -23,7 +23,7 @@ MAIN = ${BASE}
 #====================================================================
 SOURCE = prec.o vardef.o date.o lattconv.o readpos.o writepos.o \
          posvasp.o pospwscf.o posxyz.o posgrof.o posbgf.o       \
-         lmp_atom.o siesta.o abinit.o                           \
+         lmp_atom.o siesta.o abinit.o latgen.o                  \
          posvel.o posms.o lammps.o screen.o operation.o         \
          realign.o nominal.o neighbor.o error.o main.o
 

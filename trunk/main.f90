@@ -38,10 +38,11 @@ implicit none
    write(*, '( 15x, "9. LAMMPS dump atom;"                             )' )
    write(*, '( 14x, "10. Siesta STRUCT_IN;"                            )' )
    write(*, '( 14x, "11. Abinit/BigDFT xyz;"                           )' )
+   write(*, '( 14x, "12. MS RES file;"                                 )' )
    write(*, '( 15x, "0. Exit."                                         )' )
    write(*, '( 10x, "Your choice [3]:", $                              )' )
    read (*, '(A)', iostat=ioerr ) input
-   Ninpostypes = 11  ! change its value if new type to read is enabled.
+   Ninpostypes = 12  ! change its value if new type to read is enabled.
    call error( subname, info, ioerr )
    !
    if ( input.eq.'' ) then
@@ -97,10 +98,11 @@ implicit none
    write(*, '( 14X, "11. LAMMPS dump atom;"                            )' )
    write(*, '( 14X, "12. Siesta STRUCT_IN;"                            )' )
    write(*, '( 14X, "13. Abinit/BigDFT xyz;"                           )' )
+   write(*, '( 14X, "14. Prepare for latgen;"                          )' )
    write(*, '( 15x, "0. Exit."                                         )' )
    write(*, '( 10x, "Your choice [3]:", $                              )' )
    read (*, '(A)', iostat=ioerr ) input
-   Noutpostypes = 13 ! change if new format is enabled
+   Noutpostypes = 14 ! change if new format is enabled
    call error( subname, info, ioerr )
    !
    if ( input.eq.'' ) then

@@ -108,6 +108,14 @@ implicit none
       write( ioout, 350 ) EName( attyp(i) ), atpos(:, i)
    enddo
    !
+   if (natom < 4) then
+     write(*,'(/,10x,"Lattice vector info:")')
+     write(*, 310)
+     do i = 1, 3
+       write(*, 320) i, axis(i,:)*alat
+     enddo
+   endif
+   !
 100 format( I8 )
 200 format( A  )
 300 format( A2, 3(1X, F16.10), $ )
