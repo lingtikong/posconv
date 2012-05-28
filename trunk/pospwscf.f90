@@ -33,7 +33,7 @@ implicit none
    write( ioout, 101 )
    write( ioout, 200 ) "&system"
    write( ioout, 300 ) "ibrav     = ", ibrav
-   write( ioout, 400 ) "celldm(1) = ", a * alat * 1.889726D0
+   write( ioout, 400 ) "celldm(1) = ", a * 1.889726D0
    write( ioout, 400 ) "celldm(2) = ", b/a
    write( ioout, 400 ) "celldm(3) = ", c/a
    write( ioout, 400 ) "celldm(4) = ", cosbc

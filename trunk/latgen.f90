@@ -16,6 +16,7 @@ implicit none
    !
    write( ioout, '("nucell = ", I4,";")') natom
    write( ioout, '("ntype  = ", I2,";")') ntype
+   write( ioout, '(/,"// alat  = ", F8.4,";")') alat
    do i = 1, 3
       write( ioout, *)
       do j = 1, 3
@@ -39,7 +40,7 @@ implicit none
       enddo
    enddo
    write( ioout, *)
-   write( ioout, '("initialized = 1;")')
+   write( ioout, '("initialized = 1;",/,"//break;")')
    !
 return
 end subroutine
