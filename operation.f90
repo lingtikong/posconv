@@ -8,12 +8,15 @@ implicit none
    !----------------------------------------------------------------------------
    character (len=40) :: input
    character (len=1 ) :: direction(3) = (/ "X", "Y", "Z" /)
-   integer            :: ioerr, iref, nchar, idir, istr, iend, i, j
+   integer            :: ioerr, iref, nchar, idir, istr, iend, i, j, extend(3), nExt
+   integer            :: ii, jj, kk, ip, ntmp
    real(q)            :: reflect, factor, dpdum, postmp(3)
    real(q)            :: rotx(3,3), roty(3,3), rotz(3,3), ralph, rbeta, rgamm
    real(q)            :: rcosa, rsina, rcosb, rsinb, rcosg, rsing
    logical            :: first = .true.
    integer            :: newID(NMax)
+   integer, allocatable :: oneDint(:), twoDint(:,:)
+   real(q), allocatable :: oneDdbl(:), twoDdbl(:,:)
    !----------------------------------------------------------------------------
    ! Special operation on atomic positions
    do while ( .true. )
@@ -28,12 +31,13 @@ implicit none
       write(*, '( 15x, "8. Calculate nominal radius; | 17. Rotate the lattice;   " )' )
       write(*, '( 15x, "9. Apply pbc condition;      | 18. Calculate neighbor list;")')
       write(*, '( 14x,"20. Reset atomic types;       | 19. Shift the origin of cell;")')
+      write(*, '( 14x,"21. Extend original cell;     |  ",$)' )
       !
       if ( first ) then
-         write(*, '(15x, "0. As is." )' )
+         write(*, '("0. As is." )' )
          first = .false.
       else
-          write(*, '(15x, "0. Done." )' )
+          write(*, '("0. Done." )' )
       endif
       write(*, '( 10x, 70("-") )' )
       write(*, '( 10x, "Your choice [0]: ", $ )' )
@@ -281,6 +285,60 @@ implicit none
             write(*, '(A4,$)') trim(Eread(i))
          enddo
          write(*,*)
+      case ( 21 ) ! Extend the original cell
+         call DisplayCellInfo
+         write(*,'(/,10x,"Please input the number of extensions in x, y, and z [1 1 1]:", $)')
+         read (*, '(A)', iostat=ioerr ) input
+         if (ioerr.eq.0) then
+            read(input, *, iostat=ioerr) extend
+            if (ioerr.ne.0) cycle
+            do i = 1, 3
+               extend(i) = MAX(1,extend(i))
+            enddo
+            nExt = extend(1)*extend(2)*extend(3)
+            if (nExt.le.1) cycle
+
+            if (cartesian) call car2dir()
+            do i = 1, 3
+            do j = 1, 3
+               axis(i,j) = axis(i,j)*real(extend(i))
+            enddo
+            enddo
+            ntm = ntm * nExt
+            ntmp = natom * nExt
+
+            allocate(twoDdbl(3,natom), twoDint(3,natom), oneDint(natom))
+            twoDdbl = atpos
+            twoDint = atrel
+            oneDint = attyp
+            deallocate(atpos, atrel, attyp)
+            allocate(atpos(3,ntmp), atrel(3,ntmp), attyp(ntmp))
+            if (allocated(atchg)) then
+               allocate(oneDdbl(natom))
+               oneDdbl = atchg
+               deallocate(atchg)
+               allocate(atchg(ntmp))
+            endif
+            ip = 0
+            do ii = 1, extend(1)
+            do jj = 1, extend(2)
+            do kk = 1, extend(3)
+               do i = 1, natom
+                  ip = ip + 1
+                  atpos(:,ip) = twoDdbl(:,i) + real((/ ii-1, jj-1, kk-1 /))
+                  atrel(:,ip) = twoDint(:,i)
+                  attyp(ip) = oneDint(i)
+                  if (allocated(atchg)) atchg(ip) = oneDdbl(i)
+               enddo
+            enddo
+            enddo
+            enddo
+            deallocate(oneDint, twoDint, twoDdbl)
+            if (allocated(oneDdbl)) deallocate(oneDdbl)
+            natom = ntmp
+            call axis2abc()
+            call DisplayCellInfo
+         endif
       case default
          exit
       end select

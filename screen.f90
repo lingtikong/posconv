@@ -76,3 +76,24 @@ implicit none
    !
 return
 end subroutine
+
+subroutine DisplayCellInfo()
+use cell, only: ntype, natom, ntm, axis, alat
+implicit none
+   !--------------------------------------------------------------
+   integer  :: i
+   !--------------------------------------------------------------
+   write(*, '(/,10x,27("*"),2x,"System  Info", 2x, 27("*"))')
+   write(*, '(10x,"Number of atoms and atom types: ", I10,1x,I10 )') natom, ntype
+   write(*, '(10x,"Number of atoms for each type :", $)')
+   do i = 1, ntype
+      write(*, '(1x,I10,$)') ntm(i)
+   enddo
+   write(*, '(/,10x,70("-"),/,10x,"Basis vector info:")')
+   do i = 1, 3
+      write(*, '(15x, 3(F18.12,2x))') axis(i,:)
+   enddo
+   write(*, '(10x,70("-"),/)')
+   !
+return
+end subroutine

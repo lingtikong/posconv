@@ -95,11 +95,8 @@ implicit none
    do i = 1, min(4,natom)
       write( ioout, 300 ) EName( attyp(i) ), atpos(:, i)
       select case ( i )
-      case ( 1 )
-         write( ioout, 310 )
-      case ( 2:4 )
-         j = i - 1
-         write( ioout, 320 ) j, axis(j,:)*alat
+      case ( 1:3 )
+         write( ioout, 320 ) i, axis(i,:)*alat
       case default
          write( ioout, * )
       end select
@@ -110,7 +107,6 @@ implicit none
    !
    if (natom < 4) then
      write(*,'(/,10x,"Lattice vector info:")')
-     write(*, 310)
      do i = 1, 3
        write(*, 320) i, axis(i,:)*alat
      enddo
@@ -118,11 +114,9 @@ implicit none
    !
 100 format( I8 )
 200 format( A  )
-300 format( A2, 3(1X, F16.10), $ )
-310 format( " crystal_origin 0.0 0.0 0.0 crystal_images 1 1 1" )
-320 format( " crystal_vector ", I2, 3(1x, F16.10) ) 
-350 format( A2, 3(1X, F16.10)    )
-999 format( 6x,"atposMol(:,", I2,") = (/ ", 2(F14.10,"D0,",1x), F14.10,"D0 /) !" ) 
+300 format( A2, 3(1X, F20.15), $ )
+320 format( " crystal_vector ", I2, 3(1x, F20.15) ) 
+350 format( A2, 3(1X, F20.15)    )
    !
 return
 end subroutine
