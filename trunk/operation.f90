@@ -325,7 +325,7 @@ implicit none
             do kk = 1, extend(3)
                do i = 1, natom
                   ip = ip + 1
-                  atpos(:,ip) = twoDdbl(:,i) + real((/ ii-1, jj-1, kk-1 /))
+                  atpos(:,ip) = (twoDdbl(:,i) + real((/ ii-1, jj-1, kk-1 /)))/dble((/extend(1), extend(2), extend(3) /))
                   atrel(:,ip) = twoDint(:,i)
                   attyp(ip) = oneDint(i)
                   if (allocated(atchg)) atchg(ip) = oneDdbl(i)
