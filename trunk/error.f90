@@ -15,7 +15,7 @@ implicit none
    if ( trim( info(51:) ).ne.'' ) &
    &  write(*, '( 10X, "WWW", 2X, A30, 22X, "WWW" )'  ) trim( info(51:) )
    write(*, '( 10X, "WWW", 2X, "Error Code: ", I4, 36X, "WWW" )' ) ierr
-   write(*, '( 10X, "WWW", 54X, "WWW", /, 60("W") )')
+   write(*, '( 10X, "WWW", 54X, "WWW", /, 10X, 60("W") )')
    !--------------------------------------------------------------------
 return
 end subroutine

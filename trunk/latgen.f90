@@ -14,6 +14,7 @@ implicit none
    if ( cartesian ) call car2dir
    call reduceaxis
    !
+   ! Code to embed into latgen
    write( ioout, '("nucell = ", I4,";")') natom
    write( ioout, '("ntype  = ", I2,";")') ntype
    write( ioout, '(/,"// alat  = ", F8.4,";")') alat
@@ -41,6 +42,22 @@ implicit none
    enddo
    write( ioout, *)
    write( ioout, '("initialized = 1;",/,"//break;")')
+   !
+   ! input file for option 7 of latgen
+   write( ioout, '(/,F8.4)') alat
+   do i = 1, 3
+      write( ioout, '(F16.10,2X,F16.10,2X,F16.10)') axis(i,:)
+   enddo
+   do i = 1, ntype
+      write( ioout, '(I4, $)') ntm(i)
+   enddo
+   write( ioout, *)
+   do i = 1, ntype
+      do j = 1, natom
+         if (attyp(j).ne.i) cycle
+         write( ioout, '(F16.10,2X,F16.10,2X,F16.10)') atpos(:,j)
+      enddo
+   enddo
    !
 return
 end subroutine
