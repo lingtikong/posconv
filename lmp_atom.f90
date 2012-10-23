@@ -102,20 +102,27 @@ implicit none
    !----------------------------------------------------------------------------
    !
    if ( cartesian ) call car2dir
-   if ( abs(alpha-90.D0).gt.1.D0.or.abs(beta-90.D0).gt.1.D0.or.abs(gamma-90.D0).gt.1.D0 ) then
-      subname = 'write_lmp_atom'
-      info = 'Box is not orthogonal for LAMMPS atom style dump!'
-      call warn(subname, info, 0)
-   endif
+!   if ( abs(alpha-90.D0).gt.1.D0.or.abs(beta-90.D0).gt.1.D0.or.abs(gamma-90.D0).gt.1.D0 ) then
+!      subname = 'write_lmp_atom'
+!      info = 'Box is not orthogonal for LAMMPS atom style dump!'
+!      call warn(subname, info, 0)
+!   endif
    !
    write( ioout, 100 )
    write( ioout, 110 ) 0
    write( ioout, 200 ) 
    write( ioout, 210 ) natom
-   write( ioout, 300 )
-   write( ioout, 310 ) 0.D0, a
-   write( ioout, 310 ) 0.D0, b
-   write( ioout, 310 ) 0.D0, c
+   if ( axis(2,1)*axis(2,1) + axis(3,1)*axis(3,1) + axis(3,2)*axis(3,2) > 1.e-10 ) then
+      write( ioout, 301 )
+      write( ioout, 320 ) 0.D0, axis(1,1)*alat, axis(2,1)*alat
+      write( ioout, 320 ) 0.D0, axis(2,2)*alat, axis(3,1)*alat
+      write( ioout, 320 ) 0.D0, axis(3,3)*alat, axis(3,2)*alat
+   else 
+      write( ioout, 300 )
+      write( ioout, 310 ) 0.D0, a
+      write( ioout, 310 ) 0.D0, b
+      write( ioout, 310 ) 0.D0, c
+   endif
    write( ioout, 400 )
    !
    do i = 1, natom
@@ -127,7 +134,9 @@ implicit none
 200 format("ITEM: NUMBER OF ATOMS" )
 210 format(I10)
 300 format("ITEM: BOX BOUNDS" )
+301 format("ITEM: BOX BOUNDS xy xz yz" )
 310 format(2(1x,F20.10))
+320 format(3(1x,F20.10))
 400 format("ITEM: ATOMS" )
 410 format(I10,1x,I3,3(1x,F20.10))
    !
