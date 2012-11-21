@@ -44,8 +44,10 @@ implicit none
       call readsiesta
    case ( 11 ) ! Abinit/BigDFT xyz
       call read_abinit_xyz
-   case ( 12 )
+   case ( 12 ) ! MS RES
       call readres
+   case ( 13 ) ! ARTn
+      call readart
    case default
       info = 'Un-supported format!'
       call error( subname, info, 1 )

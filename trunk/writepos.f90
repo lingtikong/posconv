@@ -35,8 +35,10 @@ implicit none
       call writesiesta ! SIESTA STRUCT_IN
    case ( 13 )         ! Abinit/BigDFT xyz
       call write_abinit_xyz
-   case ( 14 )
+   case ( 14 )         ! Prepare for latgen
       call latgen
+   case ( 15 )         ! ARTn
+      call writeart
    case default
       info = "Un-support format!"
       call error( subname, info, 1 )
