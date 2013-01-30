@@ -36,7 +36,7 @@ implicit none
    alat = 1.D0
    read( ioin, '(A)', iostat=ioerr ) input
    read(input, *, iostat=ioerr) strtmp, axis(1,1), axis(2,2), axis(3,3), axis(2,1), axis(3,1), axis(3,2)
-   if (ioerr.ne.0) read( ioin, *, iostat=ioerr ) strtmp, axis(1,1), axis(2,2), axis(3,3)
+   if (ioerr.ne.0) read(input, *, iostat=ioerr ) strtmp, axis(1,1), axis(2,2), axis(3,3)
    !
    ! read atoms
    MaxAtom = 2000
@@ -105,7 +105,7 @@ implicit none
 100 format( "run_id: 0000" )
 200 format( "total_energy: 0." )
 300 format( I2, 3(1X, F20.15)  )
-350 format( "P", 3(1X, F20.15) )
+350 format( "P", 6(1X, F20.15) )
    !
 return
 end subroutine
