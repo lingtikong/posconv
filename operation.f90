@@ -4,6 +4,7 @@
 subroutine OperatePos
 use prec
 use cell
+use iounits
 implicit none
    !----------------------------------------------------------------------------
    character (len=40) :: input
@@ -17,6 +18,7 @@ implicit none
    integer            :: newID(NMax)
    integer, allocatable :: oneDint(:), twoDint(:,:)
    real(q), allocatable :: oneDdbl(:), twoDdbl(:,:)
+   logical            :: fexst
    !----------------------------------------------------------------------------
    ! Special operation on atomic positions
    do while ( .true. )
@@ -31,7 +33,7 @@ implicit none
       write(*, '( 15x, "8. Calculate nominal radius; | 17. Rotate the lattice;   " )' )
       write(*, '( 15x, "9. Apply pbc condition;      | 18. Calculate neighbor list;")')
       write(*, '( 14x,"20. Reset atomic types;       | 19. Shift the origin of cell;")')
-      write(*, '( 14x,"21. Extend original cell;     |  ",$)' )
+      write(*, '( 14x,"21. Extend original cell;     | 22. Assign charge to atoms;")' )
       !
       if ( first ) then
          write(*, '("0. As is." )' )
@@ -285,6 +287,65 @@ implicit none
             write(*, '(A4,$)') trim(Eread(i))
          enddo
          write(*,*)
+
+      case ( 22 ) ! assign atomic charges
+         idum = 0
+         write(*, '(/,10x,"To assign charges to atom, please select your method first:")')
+         write(*, '(12x, "1. read from file;")')
+         write(*, '(12x, "2. assign by type;")')
+         write(*, '(12x, "0. Exit")')
+         write(*, '(10x, "Your choice [0]: ", $)')
+         read(*, '(A)', iostat=ioerr) input
+         if (ioerr.eq.0) then
+            read(input, *, iostat=ioerr) idir
+         endif
+         if ( .not.allocated( atchg ) ) allocate( atchg(natom) )
+         atchg = 0.D0
+         if (idir.eq.1) then
+            write(*,200)
+            read(*,*,iostat=ioerr) input
+            if ( ioerr.eq.0 ) then
+               inquire( file=input, exist=fexst )
+               if ( .not.fexst ) then
+                  write(*, 250) trim(input)
+               else
+                  open(iotmp, file=input, action='read', iostat=ioerr)
+                  read(iotmp, *, iostat=ioerr) i, dpdum
+                  do while ( ioerr.eq.0 )
+                     if ( i.ge.1.and.i.le.natom ) atchg(i) = dpdum
+                     read(iotmp, *, iostat=ioerr) i, dpdum
+                  enddo
+                  close(iotmp)
+               endif
+            endif
+            write(*,'(/,10x,"Charge assigned based on data from file!")')
+         else if (idir.eq.2) then
+            if (allocated(oneDdbl)) deallocate(oneDdbl)
+            allocate(oneDdbl(ntype))
+            write(*,'(10x,"Atomic types current assigned:",/,12x,"Assigned  type IDs: ", $)')
+            do i = 1, ntype
+               write(*, '(I4,$)') typeID(i)
+            enddo
+            write(*, '(/,12x,"Read type name/IDs: ", $)')
+            do i = 1, ntype
+               write(*, '(A4,$)') trim(Eread(i))
+            enddo
+            write(*, '(/,10x,"Please input the charge for each type now: ", $)')
+            read(*, '(A)', iostat=ioerr) input
+            read(input, *, iostat=ioerr) oneDdbl
+            if (ioerr.eq.0) then
+               do i = 1, natom
+                 ip = attyp(i)
+                 atchg(i) = oneDdbl(ip)
+               enddo
+            endif
+            write(*,'(/,10x,"Charge assigned based on atomic type!")')
+         endif
+200 format(  10x,"Please input the file that carries the charge, with two columns each line.",/,&
+   &         10x,"The first line is the atom index, and the second line is the charge on that",/,&
+   &         10x,"atom. Now please input the file name: ",$)
+250 format(/,10x,"File ",A," not found, all charges will be set to be 0!")
+         !
       case ( 21 ) ! Extend the original cell
          call DisplayCellInfo
          write(*,'(/,10x,"Please input the number of extensions in x, y, and z [1 1 1]:", $)')
