@@ -49,7 +49,7 @@ implicit none
       write( ioout, '(F16.10,2X,F16.10,2X,F16.10)') axis(i,:)
    enddo
    do i = 1, ntype
-      write( ioout, '(I4, $)') ntm(i)
+      write( ioout, '(I6, $)') ntm(i)
    enddo
    write( ioout, *)
    do i = 1, ntype

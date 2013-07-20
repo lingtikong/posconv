@@ -319,12 +319,19 @@ use iounits
 use lmp_full
 implicit none
    !----------------------------------------------------------------------------
-   integer             :: i, istr, iend
+   integer             :: i, istr, iend, ichg, ioerr
    character (len=100) :: fmtstr
    !----------------------------------------------------------------------------
    call abc2axis()
    if ( .not.cartesian ) call dir2car
    !
+   ichg = 0
+   if ( allocated(atchg) ) then
+      write(*, '(/,10x,"Charge info exists, do you want to output as charge style? (y/n)[n]: ", $)')
+      read(*, '(A)', iostat = ioerr) fmtstr
+      if ( ioerr.eq.0.and.(fmtstr.eq.'y'.or.fmtstr.eq.'Y') ) ichg = 1
+   endif
+
    write( ioout, 500 ) trim( title )
    fmtstr = '(I??,2x,A)'
    write(fmtstr(3:4),'(I2)') int(log10(dble(natom)))+1
@@ -349,11 +356,17 @@ implicit none
    endif
    write( ioout, 530 )
    !
-   write( fmtstr,'("(I",I2.2,",1x,I2,3(1x,F15.8))")') int(log10(dble(natom)+0.1)+1)
-   !
-   do i = 1, natom
-      write( ioout, fmtstr ) i, attyp(i), atpos(:, i)
-   enddo
+   if (ichg.eq.0) then
+      write( fmtstr,'("(I",I2.2,",1x,I2,3(1x,F15.8))")') int(log10(dble(natom)+0.1)+1)
+      do i = 1, natom
+         write( ioout, fmtstr ) i, attyp(i), atpos(:,i)
+      enddo
+   else
+      write( fmtstr,'("(I",I2.2,",1x,I2,1x,F8.4,3(1x,F15.8))")') int(log10(dble(natom)+0.1)+1)
+      do i = 1, natom
+         write( ioout, fmtstr ) i, attyp(i), atchg(i), atpos(:,i)
+      enddo
+   endif
    !
 500 format(A,/)
 510 format(I10,2x,A,/)

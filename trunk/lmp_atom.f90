@@ -7,7 +7,7 @@ use cell
 use iounits
 implicit none
    !-----------------------------------------------------------------
-   integer            :: ioerr, i, j, jp
+   integer            :: ioerr, i, j, jp, jd
    real(q)            :: radum(3), vol, xlo, xhi, ylo, yhi, zlo, zhi
    real(q)            :: xy, xz, yz
    character (len=256):: input
@@ -69,7 +69,10 @@ implicit none
       read( ioin, '(A)', iostat=ioerr ) input
       call error( subname, info, ioerr )
       read(input, *, iostat=ioerr ) j, Etmp, radum
-      attyp(j)   = typescreen(Etmp)
+      read(Etmp, *, iostat=ioerr) jp
+      jd = typescreen(Etmp)
+      typeID(jd) = jp
+      attyp(j)   = jp
       atpos(:,j) = radum
    enddo
    !

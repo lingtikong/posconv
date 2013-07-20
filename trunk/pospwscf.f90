@@ -142,9 +142,9 @@ implicit none
       read(*, *, iostat=ioerr) celldm(3)
       call error( subname, info, ioerr )
       !
-      axis(1,1) = 1.D0 / sqrt(3.D0)
-      axis(2,2) = 1.D0 / sqrt(3.D0)
-      axis(3,3) = celldm(3) / sqrt(3.D0)
+      axis(1,1) = 1.D0
+      axis(2,2) = 1.D0
+      axis(3,3) = celldm(3)
       !
    case (7) ! Tetragonal I (bct)
       !
