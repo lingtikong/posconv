@@ -9,6 +9,7 @@ implicit none
    real(q)  :: invaxis(3, 3)
    !------------------------------------------------------------------
    if ( .not.cartesian ) return
+   ! write(*, *) axis
    call matinv( 3, axis, invaxis )
    invaxis   = invaxis / alat
    atpos     = matmul(transpose(invaxis), atpos)

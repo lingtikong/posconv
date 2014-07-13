@@ -127,7 +127,7 @@ use cell
 use iounits
 implicit none
    !----------------------------------------------------------------------------
-   character(len=40  ) :: fmtstr1 = '(??(A4,2X) )', fmtstr2 = '(??(I4, 2X) )'
+   character(len=40  ) :: fmtstr1 = '(??(A6,2X) )', fmtstr2 = '(??(I6, 1X) )'
    integer             :: i, j
    logical             :: seldyn
    !----------------------------------------------------------------------------
@@ -164,11 +164,11 @@ implicit none
    !
 100 format( I2 )
 110 format( A  )
-120 format( F20.16 )
-150 format( 3(F20.16,2X) )
+120 format( F20.14 )
+150 format( 3(F20.14,2X) )
 160 format( "Selective dynamics" )
 180 format( "direct" )
-200 format( 3( F20.16, 2X ), 3L2 )
-250 format( 3( F20.16, 2X ) )
+200 format( 3( F20.14, 2X ), 3L2 )
+250 format( 3( F20.14, 2X ) )
 return
 end subroutine

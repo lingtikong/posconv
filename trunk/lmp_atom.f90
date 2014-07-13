@@ -102,6 +102,8 @@ use iounits
 implicit none
    !----------------------------------------------------------------------------
    integer :: i, j
+   real(q)            :: xlo, xhi, ylo, yhi, zlo, zhi
+   real(q)            :: xy, xz, yz
    !----------------------------------------------------------------------------
    !
    if ( cartesian ) call car2dir
@@ -115,11 +117,24 @@ implicit none
    write( ioout, 110 ) 0
    write( ioout, 200 ) 
    write( ioout, 210 ) natom
-   if ( axis(2,1)*axis(2,1) + axis(3,1)*axis(3,1) + axis(3,2)*axis(3,2) > 1.e-10 ) then
+   xlo = 0.
+   ylo = 0.
+   zlo = 0.
+   xhi = axis(1,1) * alat
+   yhi = axis(2,2) * alat
+   zhi = axis(3,3) * alat
+   xy  = axis(2,1) * alat
+   xz  = axis(3,1) * alat
+   yz  = axis(3,2) * alat
+   if ( (xy*xy + xz*xz + yz*yz) > 1.e-10 ) then
+      xlo = xlo + min(0., xy, xz, xy+xz)
+      xhi = xhi + max(0., xy, xz, xy+xz)
+      ylo = ylo + min(0., yz)
+      yhi = yhi + max(0., yz)
       write( ioout, 301 )
-      write( ioout, 320 ) 0.D0, axis(1,1)*alat, axis(2,1)*alat
-      write( ioout, 320 ) 0.D0, axis(2,2)*alat, axis(3,1)*alat
-      write( ioout, 320 ) 0.D0, axis(3,3)*alat, axis(3,2)*alat
+      write( ioout, 320 ) xlo, xhi, xy
+      write( ioout, 320 ) ylo, yhi, xz
+      write( ioout, 320 ) zlo, zhi, yz
    else 
       write( ioout, 300 )
       write( ioout, 310 ) 0.D0, a
@@ -136,11 +151,11 @@ implicit none
 110 format(I15)
 200 format("ITEM: NUMBER OF ATOMS" )
 210 format(I10)
-300 format("ITEM: BOX BOUNDS" )
-301 format("ITEM: BOX BOUNDS xy xz yz" )
+300 format("ITEM: BOX BOUNDS xx yy zz" )
+301 format("ITEM: BOX BOUNDS xy xz yz xx yy zz" )
 310 format(2(1x,F20.10))
 320 format(3(1x,F20.10))
-400 format("ITEM: ATOMS" )
+400 format("ITEM: ATOMS id type xs ys zs" )
 410 format(I10,1x,I3,3(1x,F20.10))
    !
 return
