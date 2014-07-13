@@ -36,10 +36,10 @@ implicit none
       write(*, '( 14x,"21. Extend original cell;     | 22. Assign charge to atoms;")' )
       !
       if ( first ) then
-         write(*, '("0. As is." )' )
+         write(*, '(15x, "0. As is." )' )
          first = .false.
       else
-          write(*, '("0. Done." )' )
+          write(*, '(15x, "0. Done." )' )
       endif
       write(*, '( 10x, 70("-") )' )
       write(*, '( 10x, "Your choice [0]: ", $ )' )

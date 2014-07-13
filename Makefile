@@ -1,19 +1,20 @@
 .SUFFIXES : .o .c .f .f90
 #
 # Machine dependent info
-FC = gfortran
+FC = /opt/intel/bin/ifort
+#FC = gfortran
 CC = cc
 
 # optimization flags
-OFLAG = -O3
+OFLAG = -O -g -traceback
 
 # Fortran and C flags
 FFLAGS = $(DFLAGS) $(OFLAG) $(DEBUG)
 CFLAGS = $(DFLAGS) $(OFLAG) $(DEBUG)
  
 # Fortran 90/95 format
-#FREE = -FR
-FREE = -ffree-form -ffree-line-length-none
+FREE = -free
+# FREE = -ffree-form -ffree-line-length-none
 #
 # 
 BASE = posconv

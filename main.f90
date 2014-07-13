@@ -120,7 +120,7 @@ implicit none
    !
    outfile = defaultOut( outtyp )
    !
-   write(*, '(/,10x, "Please input the output configuration filename[", A, "]: ", $    )' ) trim(outfile)
+   write(*, '(/,10x, "Please input the output configuration filename [", A, "]: ", $    )' ) trim(outfile)
    read (*, '(A)', iostat=ioerr ) input
    call error( subname, info, ioerr )
    if ( input.ne.'' ) then
