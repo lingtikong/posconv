@@ -2,11 +2,11 @@
 #
 # Machine dependent info
 FC = /opt/intel/bin/ifort
-#FC = gfortran
+FC = gfortran
 CC = cc
 
 # optimization flags
-OFLAG = -O -g -traceback
+OFLAG = -O #-g -traceback
 
 # Fortran and C flags
 FFLAGS = $(DFLAGS) $(OFLAG) $(DEBUG)
@@ -14,7 +14,7 @@ CFLAGS = $(DFLAGS) $(OFLAG) $(DEBUG)
  
 # Fortran 90/95 format
 FREE = -free
-# FREE = -ffree-form -ffree-line-length-none
+FREE = -ffree-form -ffree-line-length-none
 #
 # 
 BASE = posconv

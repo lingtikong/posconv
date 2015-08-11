@@ -54,7 +54,7 @@ implicit none
    end select
    close( ioin )
    !
-   if ( cartesian ) call car2dir
+   if ( cartesian ) call car2dir()
    !-----------------------------------------------------------------
 return
 end subroutine
