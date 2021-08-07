@@ -412,17 +412,15 @@ implicit none
          enddo
          write(*,'(/,10x, "Please indicate if each type will be substituted (1) or not (0): ", $)')
          read(*, *) newID(1:ntype)
-         write(*,'(10x, "Please define the new type of the substituted  atoms: ", $)')
-         read(*, *) iref
          write(*,'(10x, "Please define the x-bounds (cartesian) of the region: ", $)')
          read(*, *) block(:, 1)
          write(*,'(10x, "Please define the y-bounds (cartesian) of the region: ", $)')
          read(*, *) block(:, 2)
          write(*,'(10x, "Please define the z-bounds (cartesian) of the region: ", $)')
          read(*, *) block(:, 3)
-         write(*,'(10x, "Will the substitution be inside the region (1) or not (0): ", $)')
+         write(*,'(10x, "Will the substitution be inside the region(1) or outside(0): ", $)')
          read(*, *) side
-         write(*,'(10x, "Please define the number(>1)/fraction(<1) of atoms to be substituted: ", $)')
+         write(*,'(10x, "Please define the number or fraction of atoms to substitute: ", $)')
          read(*, *) factor
          if (.not.cartesian) call dir2car()
          ntmp = int(factor)
@@ -444,16 +442,19 @@ implicit none
             write(*,'(/,10x, "Atoms within the selection is less than the # expected!")')
          else
             if (factor.lt.1.) ntmp = int(real(nsel)*factor)
-            write(*,'(/,10x, I4, " of ", I6, " atoms would be substituted. CAUTION: ntype would not be updated.")') ntmp, nsel
+            ntype = ntype + 1
+            typeID(ntype) = ntype
+            write(Eread(ntype), '(A2)') ntype
+            write(*,'(/,10x, I4, " of ", I6, " atoms would be substituted as type ", I2, ".")') ntmp, nsel, ntype
             nsub = 0
             do while (nsub.lt.ntmp)
                call random_number(factor)
                i  = nsel * factor
                if (i.lt.1.or.i.gt.nsel) cycle
                i = oneDint(i)
-               if (attyp(i).eq.iref) cycle
+               if (attyp(i).eq.ntype) cycle
    
-               attyp(i) = iref
+               attyp(i) = ntype
                nsub = nsub + 1
             enddo
          endif
