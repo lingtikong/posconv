@@ -10,7 +10,7 @@ implicit none
    character (len=40) :: input
    character (len=1 ) :: direction(3) = (/ "X", "Y", "Z" /)
    integer            :: ioerr, iref, nchar, idir, istr, iend, i, j, extend(3), nExt
-   integer            :: ii, jj, kk, ip, ntmp
+   integer            :: ii, jj, kk, ip, ntmp, side, nsel, nsub
    real(q)            :: reflect, factor, dpdum, postmp(3), block(2, 3)
    real(q)            :: rotx(3,3), roty(3,3), rotz(3,3), ralph, rbeta, rgamm
    real(q)            :: rcosa, rsina, rcosb, rsinb, rcosg, rsing
@@ -410,49 +410,54 @@ implicit none
          do i = 1, ntype
             write(*, '(A4,$)') trim(Eread(i))
          enddo
-         write(*,'(/,10x, "Please indicate whether each type will be substituted (1) or not (0): ", $)')
+         write(*,'(/,10x, "Please indicate if each type will be substituted (1) or not (0): ", $)')
          read(*, *) newID(1:ntype)
-         write(*,'(10x, "Please define the new type ID of the substituted atoms: ", $)')
+         write(*,'(10x, "Please define the new type of the substituted  atoms: ", $)')
          read(*, *) iref
-         write(*,'(10x, "Please indicate the x-bounds (cartesian) of the region for substitution: ", $)')
+         write(*,'(10x, "Please define the x-bounds (cartesian) of the region: ", $)')
          read(*, *) block(:, 1)
-         write(*,'(10x, "Please indicate the y-bounds (cartesian) of the region for substitution: ", $)')
+         write(*,'(10x, "Please define the y-bounds (cartesian) of the region: ", $)')
          read(*, *) block(:, 2)
-         write(*,'(10x, "Please indicate the z-bounds (cartesian) of the region for substitution: ", $)')
+         write(*,'(10x, "Please define the z-bounds (cartesian) of the region: ", $)')
          read(*, *) block(:, 3)
-         write(*,'(10x, "Please indicate the number(>=1)/fraction(<1) of atoms to be substituted: ", $)')
+         write(*,'(10x, "Will the substitution be inside the region (1) or not (0): ", $)')
+         read(*, *) side
+         write(*,'(10x, "Please define the number(>1)/fraction(<1) of atoms to be substituted: ", $)')
          read(*, *) factor
          if (.not.cartesian) call dir2car()
          ntmp = int(factor)
-         if (factor < 1.) then
-            nExt = 0
-            do i = 1, natom
-               ip = attyp(i)
-               if (newID(ip).eq.0) continue
-               jj = 0
-               do ii = 1, 3
-                  if (atpos(ii, i).gt.block(2, ii).or.atpos(ii, i).lt.block(1, ii)) jj = ii
-               enddo
-               if (jj.gt.0) continue
-               nExt = nExt + 1
-            enddo
-            ntmp = int(real(nExt)*factor)
-         endif
-         write(*,'(/,10x, I4, " atoms would be substituted. CAUTION: ntype would not be updated.")') ntmp
-         nExt = 0
-         do while (nExt.lt.ntmp)
-            call random_number(factor)
-            i  = natom * factor
+         allocate(oneDint(natom))
+         nsel = 0
+         do i = 1, natom
             ip = attyp(i)
-            if (newID(ip) == 0) continue
+            if (newID(ip).eq.0) cycle
             jj = 0
             do ii = 1, 3
-               if (atpos(ii, i).gt.block(2, ii).or.atpos(ii, i).lt.block(1, ii)) jj = ii
+               if ( (atpos(ii, i).gt.block(2, ii)).or.(atpos(ii, i).lt.block(1, ii))) jj = ii
             enddo
-            if (jj.gt.0) continue
-            attyp(i) = iref
-            nExt = nExt + 1
+            if (side.eq.1.and.jj.gt.0) cycle
+            if (side.ne.1.and.jj.eq.0) cycle
+            nsel = nsel + 1
+            oneDint(nsel) = i
          enddo
+         if (nsel.lt.ntmp) then
+            write(*,'(/,10x, "Atoms within the selection is less than the # expected!")')
+         else
+            if (factor.lt.1.) ntmp = int(real(nsel)*factor)
+            write(*,'(/,10x, I4, " of ", I6, " atoms would be substituted. CAUTION: ntype would not be updated.")') ntmp, nsel
+            nsub = 0
+            do while (nsub.lt.ntmp)
+               call random_number(factor)
+               i  = nsel * factor
+               if (i.lt.1.or.i.gt.nsel) cycle
+               i = oneDint(i)
+               if (attyp(i).eq.iref) cycle
+   
+               attyp(i) = iref
+               nsub = nsub + 1
+            enddo
+         endif
+         deallocate(oneDint)
       case default
          exit
       end select
