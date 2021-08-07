@@ -22,7 +22,7 @@ implicit none
    character (len=2), allocatable :: EName(:)
    !----------------------------------------------------------------------------
    ! Used to identify atomic type
-   integer, parameter :: NMax = 10
+   integer, parameter :: NMax = 20
    integer            :: iadum(NMax) = 0, idum = 0, typeID(NMax)
    character (len=2)  :: ERead(NMax)
    !----------------------------------------------------------------------------

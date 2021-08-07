@@ -23,7 +23,7 @@ implicit none
    ! Special operation on atomic positions
    do while ( .true. )
       write(*, '(//, 10x, 15("="), 2x, "Special operation on atomic positions", 2x, 14("=") )' )
-      write(*, '( 15x, "1. Reflect around y-z plane; | 10. Shift along x direction; " )' )
+      write(*, '( 15x, "1. Reflect around y-z plane; + 10. Shift along x direction; " )' )
       write(*, '( 15x, "2. Reflect around x-z plane; | 11. Shift along y direction; " )' )
       write(*, '( 15x, "3. Reflect around x-y plane; | 12. Shift along z direction; " )' )
       write(*, '( 15x, "4. Rescale lattice constant; | 13. Sort along x direction;  " )' )
@@ -34,7 +34,7 @@ implicit none
       write(*, '( 15x, "9. Apply pbc condition;      | 18. Calculate neighbor list;")')
       write(*, '( 14x,"20. Reset atomic types;       | 19. Shift the origin of cell;")')
       write(*, '( 14x,"21. Extend original cell;     | 22. Assign charge to atoms;")' )
-      write(*, '( 14x,"23. Substitute selected atoms;")')
+      write(*, '( 14x,"23. Substitute selected atoms;+")')
       !
       if ( first ) then
          write(*, '(15x, "0. As is." )' )
