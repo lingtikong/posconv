@@ -11,7 +11,7 @@ implicit none
    character (len=1 ) :: direction(3) = (/ "X", "Y", "Z" /)
    integer            :: ioerr, iref, nchar, idir, istr, iend, i, j, extend(3), nExt
    integer            :: ii, jj, kk, ip, ntmp
-   real(q)            :: reflect, factor, dpdum, postmp(3)
+   real(q)            :: reflect, factor, dpdum, postmp(3), block(2, 3)
    real(q)            :: rotx(3,3), roty(3,3), rotz(3,3), ralph, rbeta, rgamm
    real(q)            :: rcosa, rsina, rcosb, rsinb, rcosg, rsing
    logical            :: first = .true.
@@ -34,6 +34,7 @@ implicit none
       write(*, '( 15x, "9. Apply pbc condition;      | 18. Calculate neighbor list;")')
       write(*, '( 14x,"20. Reset atomic types;       | 19. Shift the origin of cell;")')
       write(*, '( 14x,"21. Extend original cell;     | 22. Assign charge to atoms;")' )
+      write(*, '( 14x,"23. Substitute selected atoms;")')
       !
       if ( first ) then
          write(*, '(15x, "0. As is." )' )
@@ -381,18 +382,18 @@ implicit none
                allocate(atchg(ntmp))
             endif
             ip = 0
-            do ii = 1, extend(1)
-            do jj = 1, extend(2)
-            do kk = 1, extend(3)
-               do i = 1, natom
+            do i = 1, natom
+               do ii = 1, extend(1)
+               do jj = 1, extend(2)
+               do kk = 1, extend(3)
                   ip = ip + 1
                   atpos(:,ip) = (twoDdbl(:,i) + real((/ ii-1, jj-1, kk-1 /)))/dble((/extend(1), extend(2), extend(3) /))
                   atrel(:,ip) = twoDint(:,i)
                   attyp(ip) = oneDint(i)
                   if (allocated(atchg)) atchg(ip) = oneDdbl(i)
                enddo
-            enddo
-            enddo
+               enddo
+               enddo
             enddo
             deallocate(oneDint, twoDint, twoDdbl)
             if (allocated(oneDdbl)) deallocate(oneDdbl)
@@ -400,6 +401,58 @@ implicit none
             call axis2abc()
             call DisplayCellInfo
          endif
+      case (23)          ! Generate substitutional solid solution
+         write(*,'(10x,"Atomic types current assigned:",/,12x,"Assigned  type IDs: ", $)')
+         do i = 1, ntype
+            write(*, '(I4,$)') typeID(i)
+         enddo
+         write(*, '(/,12x,"Read type name/IDs: ", $)')
+         do i = 1, ntype
+            write(*, '(A4,$)') trim(Eread(i))
+         enddo
+         write(*,'(/,10x, "Please indicate whether each type will be substituted (1) or not (0): ", $)')
+         read(*, *) newID(1:ntype)
+         write(*,'(10x, "Please define the new type ID of the substituted atoms: ", $)')
+         read(*, *) iref
+         write(*,'(10x, "Please indicate the x-bounds (cartesian) of the region for substitution: ", $)')
+         read(*, *) block(:, 1)
+         write(*,'(10x, "Please indicate the y-bounds (cartesian) of the region for substitution: ", $)')
+         read(*, *) block(:, 2)
+         write(*,'(10x, "Please indicate the z-bounds (cartesian) of the region for substitution: ", $)')
+         read(*, *) block(:, 3)
+         write(*,'(10x, "Please indicate the number(>=1)/fraction(<1) of atoms to be substituted: ", $)')
+         read(*, *) factor
+         if (.not.cartesian) call dir2car()
+         ntmp = int(factor)
+         if (factor < 1.) then
+            nExt = 0
+            do i = 1, natom
+               ip = attyp(i)
+               if (newID(ip).eq.0) continue
+               jj = 0
+               do ii = 1, 3
+                  if (atpos(ii, i).gt.block(2, ii).or.atpos(ii, i).lt.block(1, ii)) jj = ii
+               enddo
+               if (jj.gt.0) continue
+               nExt = nExt + 1
+            enddo
+            ntmp = int(real(nExt)*factor)
+         endif
+         write(*,'(/,10x, I4, " atoms would be substituted. CAUTION: ntype would not be updated.")') ntmp
+         nExt = 0
+         do while (nExt.lt.ntmp)
+            call random_number(factor)
+            i  = natom * factor
+            ip = attyp(i)
+            if (newID(ip) == 0) continue
+            jj = 0
+            do ii = 1, 3
+               if (atpos(ii, i).gt.block(2, ii).or.atpos(ii, i).lt.block(1, ii)) jj = ii
+            enddo
+            if (jj.gt.0) continue
+            attyp(i) = iref
+            nExt = nExt + 1
+         enddo
       case default
          exit
       end select
