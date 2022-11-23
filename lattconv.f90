@@ -1,7 +1,7 @@
 !******************************************************************************
 !*** This subroutine transfer the coordinate from cartesian into fractional ***
 !****************************************************************************** 
-subroutine car2dir
+subroutine car2dir()
 use prec
 use cell, only: axis, atpos, alat, cartesian
 implicit none
@@ -21,7 +21,7 @@ end subroutine
 !******************************************************************************
 !*** This subroutine transfer the coordinate from fractional into cartesian ***
 !******************************************************************************
-subroutine dir2car
+subroutine dir2car()
 use prec
 use cell, only: axis, atpos, alat, cartesian
 implicit none
@@ -197,7 +197,7 @@ implicit none
       enddo
    enddo
 
-   do l=n, 0, -1
+   do l=n, 1, -1
       rl = indxr(l)
       cl = indxc(l)
       if ( rl.ne.cl ) then
@@ -208,4 +208,5 @@ implicit none
          enddo
       endif
    enddo
+
 end subroutine

@@ -87,7 +87,7 @@ implicit none
    integer :: i, j
    !----------------------------------------------------------------------------
    !
-   if ( .not.cartesian ) call dir2car
+   if ( .not.cartesian ) call dir2car()
    !
    write( ioout, 100 ) natom
    write( ioout, 200 ) trim(title)

@@ -104,7 +104,7 @@ implicit none
       alat = ( -alat / vol ) ** ( 1.D0/3.D0 )
    endif
    !
-   call axis2abc
+   call axis2abc()
    !
    ! Ask the user to input the element(s) name
    info = 'Wrong input while the system tries to get the element names!'
