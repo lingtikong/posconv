@@ -82,12 +82,12 @@ implicit none
    endif
    !
    forall ( i=1:natom) atpos(:,i) = atpos(:,i) + posnew
-   call car2dir( )
    !
    write( *, 90 )
    read ( *, '(A)', iostat=ioerr ) input
    if ( ioerr.eq.0 ) then
       if ( input.eq.'y'.or.input.eq.'Y' ) then
+         call car2dir( )
          atpos = mod(atpos, 1.D0)
          where ( atpos.lt.0.D0 ) atpos = atpos + 1.D0
       endif
