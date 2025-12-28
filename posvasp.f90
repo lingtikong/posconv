@@ -43,7 +43,7 @@ implicit none
    ! also be changed.
    input = trim(input)//" 0 0 0 0 0 0 0 0 0 0"
    read(input, *, iostat=ioerr ) iadum
-   call error( subname, info, ioerr )
+   call error( subname, info, MAX(0,ioerr) )
    natom = sum( iadum )
    ntype = count( iadum.gt.0 )
    !
