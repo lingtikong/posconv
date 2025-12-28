@@ -85,12 +85,19 @@ use iounits
 implicit none
    !----------------------------------------------------------------------------
    integer :: i, j
+   character (len=512):: newtitle
    !----------------------------------------------------------------------------
    !
    if ( .not.cartesian ) call dir2car()
    !
+   write( newtitle, 010)
+   do i = 1, 3
+      write( newtitle, 020) trim(newtitle), axis(i,:)*alat
+   enddo
+   write( newtitle, 030) trim(newtitle), trim(title)
+   !
    write( ioout, 100 ) natom
-   write( ioout, 200 ) trim(title)
+   write( ioout, 200 ) trim(newtitle)
    !
    do i = 1, min(4,natom)
       write( ioout, 300 ) EName( attyp(i) ), atpos(:, i)
@@ -112,6 +119,9 @@ implicit none
      enddo
    endif
    !
+010 format( "lattice='")
+020 format( A, 3(1X, F15.10) )
+030 format( A, "' title='", A, "'")
 100 format( I8 )
 200 format( A  )
 300 format( A2, 3(1X, F20.15), $ )
