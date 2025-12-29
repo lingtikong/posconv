@@ -7,10 +7,11 @@ use cell
 use iounits
 implicit none
    !-----------------------------------------------------------------
-   integer            :: ioerr, i, j
+   integer            :: ioerr, i, j, il, ir, flag = 0
    real(q)            :: radum(3), vol
-   character (len=256):: input
+   character (len=512):: input
    character (len=20 ):: strtmp
+   character (len=2  ):: delimiter = "'"
    integer, external  :: typescreen
    !-----------------------------------------------------------------
    subname = 'readxyz'
@@ -30,13 +31,27 @@ implicit none
    read( ioin, '(A)', iostat=ioerr ) title
    call error( subname, info, ioerr )
    !
+   ! analyze the title for extended xyz format
+   i = index(title, 'lattice')
+   if (i > 0) then
+      il = index(title(i+1:), delimiter)
+      if (il == 0) then
+         delimiter = '"'
+         il = index(title(i+1:), delimiter)
+      endif
+      il = il + i + 1
+      ir = index(title(il:), delimiter) + il - 2
+      read(title(il:ir), *, iostat = ioerr) axis
+      if (ioerr == 0) flag = 1
+   endif
+   !
    ! Read atomic positions
    do i = 1, natom
       read( ioin, '(A)', iostat=ioerr ) input
       call error( subname, info, ioerr )
       idum = 0
       read(input, *, iostat=ioerr ) ETmp, atpos(:,i), strtmp, idum, radum
-      if ( ioerr.eq.0.and.(idum.ge.1.and.idum.le.3) ) axis(idum, :) = radum
+      if ( flag.eq.0.and.ioerr.eq.0.and.(idum.ge.1.and.idum.le.3) ) axis(idum, :) = radum
       attyp(i) = typescreen( ETmp )
    enddo
    !
@@ -121,7 +136,7 @@ implicit none
    !
 010 format( "lattice='")
 020 format( A, 3(1X, F15.10) )
-030 format( A, "' title='", A, "'")
+030 format( A, "' pbc='T T T' properties=species:S:1:pos:R:3 title='", A, "'")
 100 format( I8 )
 200 format( A  )
 300 format( A2, 3(1X, F20.15), $ )

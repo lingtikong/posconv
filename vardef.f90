@@ -15,8 +15,8 @@ implicit none
    real(q), allocatable :: atpos(:,:), atchg(:)
    integer, allocatable :: atrel(:,:), attyp(:), ntm(:)
    !----------------------------------------------------------------------------
-   character ( len=80 ) :: title, infile, outfile, info
-   character ( len=20 ) :: subname
+   character ( len=512) :: title, infile, outfile, info
+   character ( len=128) :: subname
    character ( len=2  ) :: ETmp
    !----------------------------------------------------------------------------
    character (len=2), allocatable :: EName(:)
