@@ -32,6 +32,13 @@ implicit none
    call error( subname, info, ioerr )
    !
    ! analyze the title for extended xyz format
+   ! convert all letters in titile as lower-case
+   do i = 1, len(title)
+      if (title(i:i) >= 'A' .and. title(i:i) <= 'Z') then
+         title(i:i) = char(ichar(title(i:i)) - ichar('A') + ichar('a'))
+      endif
+   enddo
+   !
    i = index(title, 'lattice')
    if (i > 0) then
       il = index(title(i+1:), delimiter)
@@ -42,7 +49,11 @@ implicit none
       il = il + i + 1
       ir = index(title(il:), delimiter) + il - 2
       read(title(il:ir), *, iostat = ioerr) axis
-      if (ioerr == 0) flag = 1
+      if (ioerr == 0) then
+         flag = 1
+      else
+         axis = 0.
+      endif
    endif
    !
    ! Read atomic positions
@@ -100,7 +111,7 @@ use iounits
 implicit none
    !----------------------------------------------------------------------------
    integer :: i, j
-   character (len=512):: newtitle
+   character (len=512):: newtitle ! extended xyz format
    !----------------------------------------------------------------------------
    !
    if ( .not.cartesian ) call dir2car()
