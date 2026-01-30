@@ -28,8 +28,8 @@ implicit none
    !----------------------------------------------------------------------------
    real(q)             :: dqdum(3), chgdum
    integer             :: ioerr, rderr, i, aid, mid, tid, idumarray(5)
-   character (len=256) :: oneline
-   character (len=20 ) :: strtmp
+   character (len=512) :: oneline
+   character (len=50 ) :: strtmp, keyword
    !-----------------------------------------------------------------
    subname   = 'readlmpfull'
    atoms     = 0
@@ -53,7 +53,14 @@ implicit none
    read(ioin,'(A)', iostat=ioerr) lmptitle
    read(ioin,'(A)', iostat=ioerr) oneline
    do while (ioerr.eq.0)
-      select case ( trim(oneline) )
+      i = index(oneline, '#')
+      if (i.gt.0) then
+         keyword = oneline(1:i-1)
+      else
+         keyword = trim(oneline)
+      endif
+
+      select case ( trim(keyword) )
       case ( 'Masses' )
          if (atomtypes.lt.1) then
             info = 'Masses defined before number of atom types!'
@@ -73,6 +80,7 @@ implicit none
             endif
             Masses(idum) = dqdum(1)
          enddo
+
       case ( 'Pair Coeffs' )
          if (atomtypes.lt.1) then
             info = 'Pair Coeffs defined before number of atom types!'
@@ -87,6 +95,7 @@ implicit none
             read(ioin, '(A)', iostat=rderr) PairCoeffs(i)
             if (rderr.ne.0) call error( subname, info, 1)
          enddo
+
       case ( 'Bond Coeffs' )
          if (bondtypes.lt.1) then
             info = 'Bond Coeffs defined before number of bond types!'
@@ -101,6 +110,7 @@ implicit none
             read(ioin, '(A)', iostat=rderr) BondCoeffs(i)
             if (rderr.ne.0) call error( subname, info, 1)
          enddo
+
       case ( 'Angle Coeffs' )
          if (angletypes.lt.1) then
             info = 'Angle Coeffs defined before number of angle types!'
@@ -115,6 +125,7 @@ implicit none
             read(ioin, '(A)', iostat=rderr) AngleCoeffs(i)
             if (rderr.ne.0) call error( subname, info, 1)
          enddo
+
       case ( 'Dihedral Coeffs' )
         if (dihedraltypes.lt.1) then
             info = 'Dihedral Coeffs defined before number of dihedral types!'
@@ -129,6 +140,7 @@ implicit none
             read(ioin, '(A)', iostat=rderr) DihedralCoeffs(i)
             if (rderr.ne.0) call error( subname, info, 1)
          enddo
+
       case ( 'Atoms' )
          if (atoms.lt.1) then
             info = 'Atomic position defined before number of atoms!'
@@ -159,6 +171,7 @@ implicit none
                call error( subname, info, 1)
             endif
          enddo
+
       case ( 'Velocities' )
          if (atoms.lt.1) then
             info = 'Velocities defined before number of atoms!'
@@ -176,6 +189,7 @@ implicit none
                call error( subname, info, 1)
             endif
          enddo
+
       case ( 'Bonds' )
          if (bonds.lt.1) then
             info = 'Bond list defined before number of bonds!'
@@ -193,6 +207,7 @@ implicit none
                call error( subname, info, 1)
             endif
          enddo
+
       case ( 'Angles' )
          if (angles.lt.1) then
             info = 'Angle list defined before number of angles!'
@@ -210,6 +225,7 @@ implicit none
                call error( subname, info, 1)
             endif
          enddo
+
       case ( 'Dihedrals' )
          if (dihedrals.lt.1) then
             info = 'Dihedral list defined before number of dihedrals!'
@@ -227,6 +243,7 @@ implicit none
                call error( subname, info, 1)
             endif
          enddo
+
       case default
          read(oneline, *, iostat=rderr) dqdum, strtmp
          if (rderr.eq.0.and.trim(strtmp).eq.'xy') then
@@ -444,11 +461,11 @@ implicit none
          write( ioout, 550 ) trim(DihedralCoeffs(i))
       enddo
    endif
-   fmtstr = '(I??,1x,I?,1x,I?,1x,F10.5,3(1x,F19.12),3(1x,I??))'
+   fmtstr = '(I??,1x,I??,1x,I?,1x,F10.5,3(1x,F19.12),3(1x,I??))'
    write(fmtstr(3:4),'(I2)') int(log10(dble(atoms)))+1
-   write(fmtstr(10:10),'(I1)') int(log10(dble(maxval(MolID))))+1
-   write(fmtstr(16:16),'(I1)') int(log10(dble(atomtypes))) + 1
-   write(fmtstr(46:47),'(I2)') int(log10(dble(maxval(abs(images))))) + 1
+   write(fmtstr(10:11),'(I2)') int(log10(dble(maxval(MolID))))+1
+   write(fmtstr(17:17),'(I1)') int(log10(dble(atomtypes))) + 1
+   write(fmtstr(47:48),'(I2)') int(log10(dble(maxval(abs(images))))) + 2 ! Could be negative
    !
    write( ioout, 530 ) "Atoms"
    do i = 1, atoms
