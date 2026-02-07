@@ -7,11 +7,11 @@ use cell
 use iounits
 implicit none
    !-----------------------------------------------------------------
-   integer            :: ioerr, i, j, il, ir, flag = 0
+   integer            :: ioerr, i, j, il, ir, flag = 0, nc
    real(q)            :: radum(3), vol
    character (len=512):: input
    character (len=20 ):: strtmp
-   character (len=2  ):: delimiter = "'"
+   character (len=5  ):: delimiter = "'"
    integer, external  :: typescreen
    !-----------------------------------------------------------------
    subname = 'readxyz'
@@ -33,21 +33,19 @@ implicit none
    !
    ! analyze the title for extended xyz format
    ! convert all letters in titile as lower-case
-   do i = 1, len(title)
+   nc = len(trim(title))
+   do i = 1, nc
       if (title(i:i) >= 'A' .and. title(i:i) <= 'Z') then
          title(i:i) = char(ichar(title(i:i)) - ichar('A') + ichar('a'))
       endif
+      if (title(i:i) == '"') title(i:i) = delimiter(1:1)
    enddo
    !
-   i = index(title, 'lattice')
+   i = index(title, 'lattice', back=.false.)
    if (i > 0) then
-      il = index(title(i+1:), delimiter)
-      if (il == 0) then
-         delimiter = '"'
-         il = index(title(i+1:), delimiter)
-      endif
-      il = il + i + 1
-      ir = index(title(il:), delimiter) + il - 2
+      il = index(title(i:nc), delimiter(1:1), back=.false.)
+      il = il + i
+      ir = index(title(il:nc), delimiter(1:1), back=.false.) + il - 2
       read(title(il:ir), *, iostat = ioerr) axis
       if (ioerr == 0) then
          flag = 1
