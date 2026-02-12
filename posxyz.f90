@@ -109,16 +109,22 @@ use iounits
 implicit none
    !----------------------------------------------------------------------------
    integer :: i, j
-   character (len=512):: newtitle ! extended xyz format
+   character (len=512):: newtitle =""! extended xyz format
    !----------------------------------------------------------------------------
    !
    if ( .not.cartesian ) call dir2car()
    !
-   write( newtitle, 010)
-   do i = 1, 3
-      write( newtitle, 020) trim(newtitle), axis(i,:)*alat
-   enddo
-   write( newtitle, 030) trim(newtitle), trim(title)
+   if (index(title, "lattice") < 1) then
+      write( newtitle, 010)
+      do i = 1, 3
+         write( newtitle, 020) trim(newtitle), axis(i,:)*alat
+      enddo
+      write( newtitle, 030) trim(newtitle)
+   endif
+   if (index(title, "pbc") < 1) then
+      write( newtitle, 040) trim(newtitle)
+   endif
+   write( newtitle, 050) trim(newtitle), trim(title)
    !
    write( ioout, 100 ) natom
    write( ioout, 200 ) trim(newtitle)
@@ -145,7 +151,9 @@ implicit none
    !
 010 format( "lattice='")
 020 format( A, 3(1X, F15.10) )
-030 format( A, "' pbc='T T T' properties=species:S:1:pos:R:3 title='", A, "'")
+030 format( A, "' ")
+040 format( A, "pbc='T T T' ")
+050 format( A, "properties=species:S:1:pos:R:3 ", A)
 100 format( I8 )
 200 format( A  )
 300 format( A2, 3(1X, F20.15), $ )
