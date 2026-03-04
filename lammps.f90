@@ -4,16 +4,16 @@ module lmp_full
 use prec
 implicit none
    !----------------------------------------------------------------------------
-   integer :: atoms = 0, bonds=0, angles=0, dihedrals=0
-   integer :: atomtypes=0, bondtypes=0, angletypes=0, dihedraltypes=0
+   integer :: atoms = 0, bonds=0, angles=0, dihedrals=0, impropers=0
+   integer :: atomtypes=0, bondtypes=0, angletypes=0, dihedraltypes=0, impropertypes=0
    real(q) :: xlo, xhi, ylo, yhi, zlo, zhi, xy, xz, yz
    !
    real(q), allocatable :: Masses(:), Velocities(:,:)
    integer, allocatable :: MolID(:), images(:,:)
-   integer, allocatable :: Bondlist(:,:), Anglelist(:,:), Dihedrallist(:,:)
+   integer, allocatable :: Bondlist(:,:), Anglelist(:,:), Dihedrallist(:,:), Improperlist(:,:)
    character(len=256)   :: lmptitle
    character(len=512),allocatable :: PairCoeffs(:), BondCoeffs(:)
-   character(len=512),allocatable :: AngleCoeffs(:), DihedralCoeffs(:)
+   character(len=512),allocatable :: AngleCoeffs(:), DihedralCoeffs(:), ImproperCoeffs(:)
    !
    logical :: lmp_full_read = .false.
    !----------------------------------------------------------------------------
@@ -36,10 +36,12 @@ implicit none
    bonds     = 0
    angles    = 0
    dihedrals = 0
+   impropers = 0
    atomtypes = 0
    bondtypes = 0
    angletypes = 0
    dihedraltypes = 0
+   impropertypes = 0
    xlo = 0.D0
    xhi = 0.D0
    ylo = 0.D0
@@ -60,7 +62,7 @@ implicit none
          keyword = trim(oneline)
       endif
 
-      select case ( trim(keyword) )
+      select case ( trim(adjustl(keyword)) )
       case ( 'Masses' )
          if (atomtypes.lt.1) then
             info = 'Masses defined before number of atom types!'
@@ -141,6 +143,21 @@ implicit none
             if (rderr.ne.0) call error( subname, info, 1)
          enddo
 
+      case ( 'Improper Coeffs' )
+        if (impropertypes.lt.1) then
+            info = 'Improper Coeffs defined before number of improper types!'
+            call error( subname, info, 1)
+         endif
+         info = 'Error while reading Improper Coeffs info!'
+         read(ioin, '(A)', iostat=ioerr) oneline
+         if (ioerr.ne.0) call error( subname, info, 1)
+         if (allocated(ImproperCoeffs)) deallocate(ImproperCoeffs)
+         allocate( ImproperCoeffs(impropertypes) )
+         do i = 1, impropertypes
+            read(ioin, '(A)', iostat=rderr) ImproperCoeffs(i)
+            if (rderr.ne.0) call error( subname, info, 1)
+         enddo
+
       case ( 'Atoms' )
          if (atoms.lt.1) then
             info = 'Atomic position defined before number of atoms!'
@@ -152,7 +169,8 @@ implicit none
          if ( allocated( atchg ) ) deallocate(atchg)
          if ( allocated( MolID ) ) deallocate(MolID)
          if ( allocated(images ) ) deallocate(images)
-         allocate( atpos(3,atoms), attyp(atoms), atrel(3,atoms), atchg(atoms), MolID(atoms), images(3,atoms) ) 
+         allocate( atpos(3,atoms), attyp(atoms), atrel(3,atoms), atchg(atoms))
+         allocate( MolID(atoms), images(3,atoms) ) 
          atrel = 1
          info = 'Error while reading atomic positions!'
          read(ioin, '(A)', iostat=ioerr) oneline
@@ -161,7 +179,7 @@ implicit none
             if (rderr.ne.0) call error( subname, info, 1)
             oneline = trim(oneline)//" 0 0 0"
             read(oneline,*,iostat=rderr) aid, mid, tid, chgdum, dqdum, idumarray(1:3)
-            if (rderr.eq.0) then
+            if (rderr.eq.0.and.aid.gt.0.and.aid.le.atoms) then
                atpos(:,aid) = dqdum
                attyp(aid)   = tid
                atchg(aid)   = chgdum
@@ -244,6 +262,24 @@ implicit none
             endif
          enddo
 
+      case ( 'Impropers' )
+         if (impropers.lt.1) then
+            info = 'Improper list defined before number of impropers!'
+            call error( subname, info, 1)
+         endif
+         if ( allocated( Improperlist ) ) deallocate(Improperlist)
+         allocate( Improperlist(5,impropers) )
+         info = 'Error while reading bond list!'
+         read(ioin, '(A)', iostat=ioerr) oneline
+         do i = 1, impropers
+            read(ioin, *, iostat=rderr) idum, idumarray(1:5)
+            if (rderr.eq.0) then
+               Improperlist(:,idum) = idumarray(1:5)
+            else
+               call error( subname, info, 1)
+            endif
+         enddo
+
       case default
          read(oneline, *, iostat=rderr) dqdum, strtmp
          if (rderr.eq.0.and.trim(strtmp).eq.'xy') then
@@ -276,6 +312,8 @@ implicit none
                      angles = idum
                   case ( 'dihedrals' )
                      dihedrals = idum
+                  case ( 'impropers' )
+                     impropers = idum
                   case ( 'atom' )
                      atomtypes = idum
                   case ( 'bond' )
@@ -284,6 +322,8 @@ implicit none
                      angletypes = idum
                   case ( 'dihedral' )
                      dihedraltypes = idum
+                  case ( 'improper' )
+                     impropertypes = idum
                   end select
                endif
             endif
@@ -413,18 +453,20 @@ implicit none
    if ( .not.cartesian ) call dir2car
    !
    fmtstr = '(I??,2x,A)'
-   write(fmtstr(3:4),'(I2)') int(log10(dble(max(atoms,bonds,angles,dihedrals))))+1
+   write(fmtstr(3:4),'(I2)') int(log10(dble(max(atoms,bonds,angles,dihedrals,impropers))))+1
    write( ioout, 500 ) trim( lmptitle )
    write( ioout, fmtstr ) atoms, "atoms"
    write( ioout, fmtstr ) bonds, "bonds"
    write( ioout, fmtstr ) angles, "angles"
    write( ioout, fmtstr ) dihedrals, "dihedrals"
+   write( ioout, fmtstr ) impropers, "impropers"
    write( ioout, * )
-   write(fmtstr(3:4),'(I2)') int(log10(dble(max(atomtypes,bondtypes,angletypes,dihedraltypes))))+1
+   write(fmtstr(3:4),'(I2)') int(log10(dble(max(atomtypes,bondtypes,angletypes,dihedraltypes,impropertypes))))+1
    write( ioout, fmtstr ) atomtypes, "atom types"
    write( ioout, fmtstr ) bondtypes, "bond types"
    write( ioout, fmtstr ) angletypes, "angle types"
    write( ioout, fmtstr ) dihedraltypes, "dihedral types"
+   write( ioout, fmtstr ) impropertypes, "improper types"
    write( ioout, * )
    write( ioout, 520 ) xlo, xhi, "xlo xhi"
    write( ioout, 520 ) ylo, yhi, "ylo yhi"
@@ -461,11 +503,19 @@ implicit none
          write( ioout, 550 ) trim(DihedralCoeffs(i))
       enddo
    endif
+   if ( allocated(ImproperCoeffs) ) then
+      write( ioout, 530 ) "Improper Coeffs"
+      do i = 1, impropertypes
+         write( ioout, 550 ) trim(ImproperCoeffs(i))
+      enddo
+   endif
    fmtstr = '(I??,1x,I??,1x,I?,1x,F10.5,3(1x,F19.12),3(1x,I??))'
    write(fmtstr(3:4),'(I2)') int(log10(dble(atoms)))+1
    write(fmtstr(10:11),'(I2)') int(log10(dble(maxval(MolID))))+1
    write(fmtstr(17:17),'(I1)') int(log10(dble(atomtypes))) + 1
-   write(fmtstr(47:48),'(I2)') int(log10(dble(maxval(abs(images))))) + 2 ! Could be negative
+   write(*, *) fmtstr, maxval(abs(images))
+   write(fmtstr(47:48),'(I2)') int(log10(dble(maxval(abs(images))+0.5))) + 2 ! Could be negative
+   write(*, *) fmtstr
    !
    write( ioout, 530 ) "Atoms"
    do i = 1, atoms
@@ -508,6 +558,16 @@ implicit none
       write(fmtstr(18:19),'(I2)') int(log10(dble(atoms)))+1
       do i = 1, dihedrals
          write( ioout, fmtstr ) i, Dihedrallist(:,i)
+      enddo
+   endif
+   if ( allocated(Improperlist) ) then
+      write( ioout, 530 ) "Impropers"
+      fmtstr = '(I??,1x,I?,4(1x,I??))'
+      write(fmtstr(3:4),'(I2)')   int(log10(dble(impropers)))+1
+      write(fmtstr(10:10),'(I1)') int(log10(dble(impropertypes)))+1
+      write(fmtstr(18:19),'(I2)') int(log10(dble(atoms)))+1
+      do i = 1, impropers
+         write( ioout, fmtstr ) i, Improperlist(:,i)
       enddo
    endif
 
