@@ -444,7 +444,7 @@ implicit none
             if (factor.lt.1.) ntmp = int(real(nsel)*factor)
             ntype = ntype + 1
             typeID(ntype) = ntype
-            write(Eread(ntype), '(A2)') ntype
+            write(Eread(ntype), '("X",I1)') ntype
             write(*,'(/,10x, I4, " of ", I6, " atoms would be substituted as type ", I2, ".")') ntmp, nsel, ntype
             nsub = 0
             do while (nsub.lt.ntmp)
@@ -457,6 +457,11 @@ implicit none
                attyp(i) = ntype
                nsub = nsub + 1
             enddo
+            ! To assign all other cell related variables
+            deallocate(ntm, EName)
+            allocate( ntm(ntype), EName(ntype) )
+            forall( i=1:ntype ) ntm(i) = count(attyp.eq.i)
+            EName = Eread(1:ntype)
          endif
          deallocate(oneDint)
       case default

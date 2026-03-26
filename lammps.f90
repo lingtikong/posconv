@@ -15,12 +15,12 @@ implicit none
    character(len=512),allocatable :: PairCoeffs(:), BondCoeffs(:)
    character(len=512),allocatable :: AngleCoeffs(:), DihedralCoeffs(:), ImproperCoeffs(:)
    !
-   logical :: lmp_full_read = .false.
+   logical :: lmp_full_read = .false., lmp_atomic_read = .false.
    !----------------------------------------------------------------------------
 end module
 
 ! To read LAMMPS full style data file
-subroutine readlmpfull()
+subroutine readLMPFull()
 use cell
 use iounits
 use lmp_full
@@ -31,7 +31,7 @@ implicit none
    character (len=512) :: oneline
    character (len=50 ) :: strtmp, keyword
    !-----------------------------------------------------------------
-   subname   = 'readlmpfull'
+   subname   = 'readLMPFull'
    atoms     = 0
    bonds     = 0
    angles    = 0
@@ -366,6 +366,160 @@ implicit none
 return
 end subroutine
 
+! To read LAMMPS atomic style data file
+subroutine readLMPAtomic()
+use cell
+use iounits
+use lmp_full
+implicit none
+   !----------------------------------------------------------------------------
+   real(q)             :: dqdum(3)
+   integer             :: ioerr, rderr, i, aid, mid, tid, idumarray(5)
+   character (len=512) :: oneline
+   character (len=50 ) :: strtmp, keyword
+   !-----------------------------------------------------------------
+   subname   = 'readLMPAtomic'
+   atoms     = 0
+   ntype     = 0
+   xlo = 0.D0
+   xhi = 0.D0
+   ylo = 0.D0
+   yhi = 0.D0
+   zlo = 0.D0
+   zhi = 0.D0
+   xy  = 0.D0
+   xz  = 0.D0
+   yz  = 0.D0
+   !
+   read(ioin,'(A)', iostat=ioerr) lmptitle
+   read(ioin,'(A)', iostat=ioerr) oneline
+   do while (ioerr.eq.0)
+      i = index(oneline, '#')
+      if (i.gt.0) then
+         keyword = oneline(1:i-1)
+      else
+         keyword = trim(oneline)
+      endif
+
+      select case ( trim(adjustl(keyword)) )
+      case ( 'Masses' )
+         if (atomtypes.lt.1) then
+            info = 'Masses defined before number of atom types!'
+            call error( subname, info, 1)
+         endif
+         info = 'Error while reading mass info!'
+         read(ioin, '(A)', iostat=ioerr) oneline
+         if (ioerr.ne.0) call error( subname, info, 1)
+         if (allocated(Masses)) deallocate(Masses)
+         allocate( Masses(atomtypes) )
+         do i = 1, atomtypes
+            read(ioin, *, iostat=rderr) idum, dqdum(1)
+            if (rderr.ne.0) call error( subname, info, 1)
+            if (idum.gt.atomtypes) then
+               info = 'Type id greater than atom_types!'
+               call error( subname, info, idum-atomtypes)
+            endif
+            Masses(idum) = dqdum(1)
+         enddo
+
+      case ( 'Atoms' )
+         if (atoms.lt.1) then
+            info = 'Atomic position defined before number of atoms!'
+            call error( subname, info, 1)
+         endif
+         if ( allocated( atpos ) ) deallocate(atpos)
+         if ( allocated( atrel ) ) deallocate(atrel)
+         if ( allocated( attyp ) ) deallocate(attyp)
+         if ( allocated(images ) ) deallocate(images)
+         allocate( atpos(3,atoms), attyp(atoms) )
+         allocate( images(3,atoms) ) 
+         atrel = 1
+         info = 'Error while reading atomic positions!'
+         read(ioin, '(A)', iostat=ioerr) oneline
+         do i = 1, atoms
+            read(ioin, '(A)', iostat=rderr) oneline
+            if (rderr.ne.0) call error( subname, info, 1)
+            oneline = trim(oneline)//" 0 0 0"
+            read(oneline,*,iostat=rderr) aid, tid, dqdum, idumarray(1:3)
+            if (rderr.eq.0.and.aid.gt.0.and.aid.le.atoms) then
+               atpos(:,aid) = dqdum
+               attyp(aid)   = tid
+               images(:,aid)= idumarray(1:3)
+            else
+               call error( subname, info, 1)
+            endif
+         enddo
+
+      case default
+         read(oneline, *, iostat=rderr) dqdum, strtmp
+         if (rderr.eq.0.and.trim(strtmp).eq.'xy') then
+            xy = dqdum(1)
+            xz = dqdum(2)
+            yz = dqdum(3)
+         else
+            read(oneline,*,iostat=rderr) dqdum(1:2), strtmp
+            if (rderr.eq.0) then
+               select case ( trim(strtmp) )
+               case ( 'xlo' )
+                  xlo = dqdum(1)
+                  xhi = dqdum(2)
+               case ( 'ylo' )
+                  ylo = dqdum(1)
+                  yhi = dqdum(2)
+               case ( 'zlo' )
+                  zlo = dqdum(1)
+                  zhi = dqdum(2)
+               end select
+            else
+               read(oneline,*,iostat=rderr) idum, strtmp
+               if (rderr.eq.0) then
+                  select case ( trim(strtmp) )
+                  case ( 'atoms' )
+                     atoms = idum
+                  case ( 'atom' )
+                     atomtypes = idum
+                  end select
+               endif
+            endif
+         endif
+      end select
+      read(ioin,'(A)',iostat=ioerr) oneline
+   enddo
+   !
+   if ( (xhi.le.xlo).or.(yhi.le.ylo).or.(zhi.le.zlo) ) then
+      info = 'Box size info is incorrect!'
+      call error( subname, info, 2)
+   endif
+   if ( atoms.lt.1.or.atomtypes.lt.1 ) then
+      info = 'No atom identified in file!'
+      call error( subname, info, 3)
+   endif
+   !
+   title = trim(lmptitle)
+   ntype = atomtypes
+   natom = atoms
+   !
+   axis(1,:) = (/ xhi-xlo, 0.D0, 0.D0 /)
+   axis(2,:) = (/ xy, yhi-ylo, 0.D0 /)
+   axis(3,:) = (/ xz, yz, zhi-zlo /)
+   alat      = 1.D0
+   !
+   ! To assign all other cell related variables
+   allocate( ntm(ntype), EName(ntype) )
+   forall( i=1:ntype ) ntm(i) = count(attyp.eq.i)
+   do i = 1, ntype
+      write(EName(i),'("X", I1)') i
+   enddo
+   Eread(1:ntype) = EName(1:ntype)
+   !
+   cartesian = .true.
+   call axis2abc()
+   !
+   lmp_atomic_read = .true.
+   !
+return
+end subroutine
+
 !*******************************************************************************
 !*** Subroutines to write LAMMPS atomic format position file                 ***
 !*******************************************************************************
@@ -513,9 +667,7 @@ implicit none
    write(fmtstr(3:4),'(I2)') int(log10(dble(atoms)))+1
    write(fmtstr(10:11),'(I2)') int(log10(dble(maxval(MolID))))+1
    write(fmtstr(17:17),'(I1)') int(log10(dble(atomtypes))) + 1
-   write(*, *) fmtstr, maxval(abs(images))
    write(fmtstr(47:48),'(I2)') int(log10(dble(maxval(abs(images))+0.5))) + 2 ! Could be negative
-   write(*, *) fmtstr
    !
    write( ioout, 530 ) "Atoms"
    do i = 1, atoms

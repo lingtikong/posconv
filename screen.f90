@@ -4,7 +4,7 @@ implicit none
    !----------------------------------------------------------------------------
    character ( len=2 ), intent(in) :: Ein
    !----------------------------------------------------------------------------
-   integer            :: i, j
+   integer            :: i, j, ioerr
    character (len=80) :: errinfo
    character (len=10) :: sname = 'typescreen'
    !----------------------------------------------------------------------------
@@ -23,7 +23,12 @@ implicit none
          errinfo = 'Too many kinds of atoms found!'
          call error( sname, errinfo, ntype )
       endif
-      Eread(ntype)  = Ein
+      read(Ein, *, iostat=ioerr) i
+      if (ioerr == 0) then
+         write(Eread(ntype), '("X",I1)') ntype
+      else
+         Eread(ntype)  = Ein
+      endif
    endif
    typescreen = j
 return

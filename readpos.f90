@@ -37,16 +37,18 @@ implicit none
    case ( 7 ) ! MS Car file
       call readcar
    case ( 8 ) ! LAMMPS full
-      call readlmpfull
+      call readLMPFull
    case ( 9 ) ! LAMMPS dump atom
+      call readLMPAtomic
+   case ( 10) ! LAMMPS dump atom
       call read_lmp_atom
-   case ( 10 ) ! SIESTA STRUCT_IN
+   case ( 11 ) ! SIESTA STRUCT_IN
       call readsiesta
-   case ( 11 ) ! Abinit/BigDFT xyz
+   case ( 12 ) ! Abinit/BigDFT xyz
       call read_abinit_xyz
-   case ( 12 ) ! MS RES
+   case ( 13 ) ! MS RES
       call readres
-   case ( 13 ) ! ARTn
+   case ( 14 ) ! ARTn
       call readart
    case default
       info = 'Un-supported format!'
